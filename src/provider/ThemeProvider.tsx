@@ -1,6 +1,6 @@
 import React from 'react';
-import {DarkTheme, LightTheme, useResolvedTheme} from '../utils/theme';
-import {StatusBar} from 'react-native';
+import { DarkTheme, LightTheme, useResolvedTheme } from '../utils/theme';
+import { StatusBar } from 'react-native';
 
 type Theme = {
   colors: typeof LightTheme;
@@ -9,11 +9,11 @@ type Theme = {
 
 const ThemeContext = React.createContext<Theme>(null as any);
 
-export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const dark = useResolvedTheme() === 'dark';
   const colors = dark ? DarkTheme : LightTheme;
   return (
-    <ThemeContext.Provider value={{colors, dark}}>
+    <ThemeContext.Provider value={{ colors, dark }}>
       {children}
       <StatusBar
         animated={true}
