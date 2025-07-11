@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const storage_keys = {
-    theme_key: 'themevar'
+    theme_key: 'themevar',
+    timer_key: 'timervar'
 };
 
 export const getFromStorage = async (key: string): Promise<string | null> => {
