@@ -3,8 +3,8 @@ import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
-import home from '../screens/home/home';
-import history from '../screens/history/history';
+import Home from '../screens/home/home';
+import History from '../screens/history/history';
 import tw from '../lib/tailwind';
 import { useTheme } from '../provider/ThemeProvider';
 import { Home as HomeIcon, History as HistoryIcon } from '../utils/icons';
@@ -47,8 +47,8 @@ const RootTabController = () => {
       // eslint-disable-next-line react/no-unstable-nested-components
       tabBar={(props: BottomTabBarProps) => <BottomTabBar {...props} />}
     >
-      <Tab.Screen name="Home" component={home} />
-      <Tab.Screen name="History" component={history} />
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="History" component={History} />
     </Tab.Navigator>
   );
 };

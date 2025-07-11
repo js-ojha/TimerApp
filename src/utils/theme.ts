@@ -105,11 +105,6 @@ const DarkTheme: Theme = {
   warning: color('warning-dark'),
   white: color('white'),
   black: color('black'),
-  story: {
-    1: color('story-1'),
-    2: color('story-2'),
-    3: color('story-3'),
-  },
   premium: {
     1: color('premium-1'),
     2: color('premium-2'),

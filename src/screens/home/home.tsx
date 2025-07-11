@@ -1,12 +1,22 @@
-import { View, Text } from 'react-native';
 import React from 'react';
+import Text from '../../component/Text';
+import ScreenContainer from '../../component/ScreenContainer';
+import { View } from 'react-native';
+import tw from '../../lib/tailwind';
+import { useTheme } from '../../provider/ThemeProvider';
 
-const home = () => {
+const Home = () => {
+  const { colors } = useTheme();
+
   return (
-    <View>
-      <Text>home</Text>
-    </View>
+    <ScreenContainer
+      style={tw.style({ backgroundColor: colors.backgroundAlt })}
+    >
+      <View>
+        <Text>home</Text>
+      </View>
+    </ScreenContainer>
   );
 };
 
-export default home;
+export default Home;
