@@ -3,7 +3,15 @@ import Text from '../../component/Text';
 import { FlatList, ScrollView, TouchableOpacity, View } from 'react-native';
 import tw from '../../lib/tailwind';
 import { useTheme } from '../../provider/ThemeProvider';
-import { ChevronDown, ChevronRight, Moon, Sun } from '../../utils/icons';
+import {
+  ChevronDown,
+  ChevronRight,
+  Moon,
+  Pause,
+  Play,
+  Reset,
+  Sun,
+} from '../../utils/icons';
 import {
   playSound,
   setTheme,
@@ -99,7 +107,7 @@ const Home = () => {
         // Mid Alerts Trigger
         if (timer.mid_trigger && timer.mid_trigger > 0) {
           const midAlertTime = Math.round(
-            (timer.duration * timer.mid_trigger) / 100,
+            timer.duration - (timer.duration * timer.mid_trigger) / 100,
           );
           if (currentRemaining === midAlertTime) {
             playSound();
@@ -155,6 +163,22 @@ const Home = () => {
     }
   };
 
+  const resetAllTimers = (timers: Timer[]) => {
+    let ids = [];
+    for (const timer of timers) {
+      ids.push(timer._id);
+      if (runningTimerIdsRef.current[timer._id]) {
+        clearInterval(runningTimerIdsRef.current[timer._id]);
+        delete runningTimerIdsRef.current[timer._id];
+      }
+    }
+    dispatch({
+      type: 'RESET_TIMERS',
+      payload: ids,
+    });
+    showSuccess('Timers reset successfully');
+  };
+
   const timerPress = (timer: Timer) => {
     if (timer.status === 'Running') {
       // Pause: clear interval
@@ -190,7 +214,7 @@ const Home = () => {
         // Mid Alerts Trigger
         if (timer.mid_trigger && timer.mid_trigger > 0) {
           const midAlertTime = Math.round(
-            (timer.duration * timer.mid_trigger) / 100,
+            timer.duration - (timer.duration * timer.mid_trigger) / 100,
           );
           if (currentRemaining === midAlertTime) {
             playSound();
@@ -257,12 +281,12 @@ const Home = () => {
       )}
       {!!state.timers.length && (
         <ScrollView
-          style={tw.style('flex-1 px-4 py-4 gap-4')}
+          style={tw.style('flex-1 px-4 py-4')}
           showsVerticalScrollIndicator={false}
         >
           {groupedTimers?.Workout.length > 0 && (
             <View
-              style={tw.style('border rounded', {
+              style={tw.style('border rounded mb-4', {
                 borderColor: colors.border,
               })}
             >
@@ -314,11 +338,7 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Start All
-                    </Text>
+                    <Play color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => pauseAllTimers(groupedTimers?.Workout)}
@@ -326,11 +346,15 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Pause All
-                    </Text>
+                    <Pause color={colors.textAlt} size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => resetAllTimers(groupedTimers?.Workout)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Reset color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
@@ -441,7 +465,7 @@ const Home = () => {
 
           {groupedTimers?.Study.length > 0 && (
             <View
-              style={tw.style('border rounded', {
+              style={tw.style('border rounded mb-4', {
                 borderColor: colors.border,
               })}
             >
@@ -493,11 +517,7 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Start All
-                    </Text>
+                    <Play color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => pauseAllTimers(groupedTimers?.Study)}
@@ -505,11 +525,15 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Pause All
-                    </Text>
+                    <Pause color={colors.textAlt} size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => resetAllTimers(groupedTimers?.Study)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Reset color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
@@ -620,7 +644,7 @@ const Home = () => {
 
           {groupedTimers?.Break.length > 0 && (
             <View
-              style={tw.style('border rounded', {
+              style={tw.style('border rounded mb-2', {
                 borderColor: colors.border,
               })}
             >
@@ -672,11 +696,7 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Start All
-                    </Text>
+                    <Play color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => pauseAllTimers(groupedTimers?.Break)}
@@ -684,11 +704,15 @@ const Home = () => {
                       backgroundColor: colors.fieldBackground,
                     })}
                   >
-                    <Text
-                      style={tw.style('text-sm', { color: colors.textAlt })}
-                    >
-                      Pause All
-                    </Text>
+                    <Pause color={colors.textAlt} size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => resetAllTimers(groupedTimers?.Break)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Reset color={colors.textAlt} size={20} />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
