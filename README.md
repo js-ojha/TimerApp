@@ -34,7 +34,7 @@ This app lets you create multiple timers, assign them to categories, set mid-ses
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone
+git clone https://github.com/js-ojha/TimerApp.git
 cd timer-app
 ```
 
