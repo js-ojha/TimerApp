@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { Style } from 'twrnc';
-import tw from '../lib/tailwind';
 
 export type IconProps = {
   color?: string;

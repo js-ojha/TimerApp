@@ -1,4 +1,3 @@
-import { DefaultTheme } from '@react-navigation/native';
 import { hexa, getTheme } from './helpers';
 import tw from '../lib/tailwind';
 import { useColorScheme } from 'react-native';
@@ -141,30 +140,6 @@ const DarkTheme: Theme = {
   foregroundAlt: color('foregroundAlt'),
 };
 
-const NavigationLightTheme: typeof DefaultTheme = {
-  colors: {
-    primary: LightTheme.primary,
-    background: LightTheme.background,
-    border: LightTheme.border,
-    card: LightTheme.background,
-    text: LightTheme.text,
-    notification: LightTheme.primary,
-  },
-  dark: false,
-};
-
-const NavigationDarkTheme: typeof DefaultTheme = {
-  colors: {
-    primary: DarkTheme.primary,
-    background: DarkTheme.background,
-    border: DarkTheme.border,
-    card: DarkTheme.background,
-    text: DarkTheme.text,
-    notification: DarkTheme.primary,
-  },
-  dark: true,
-};
-
 const useResolvedTheme = () => {
   const scheme = useColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -194,10 +169,4 @@ const useResolvedTheme = () => {
   return theme === 'system' ? { theme: scheme, setTheme } : { theme, setTheme };
 };
 
-export {
-  LightTheme,
-  DarkTheme,
-  NavigationLightTheme,
-  NavigationDarkTheme,
-  useResolvedTheme,
-};
+export { LightTheme, DarkTheme, useResolvedTheme };

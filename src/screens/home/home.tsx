@@ -3,13 +3,7 @@ import Text from '../../component/Text';
 import { FlatList, ScrollView, TouchableOpacity, View } from 'react-native';
 import tw from '../../lib/tailwind';
 import { useTheme } from '../../provider/ThemeProvider';
-import {
-  ChevronDown,
-  ChevronRight,
-  Filter,
-  Moon,
-  Sun,
-} from '../../utils/icons';
+import { ChevronDown, ChevronRight, Moon, Sun } from '../../utils/icons';
 import {
   playSound,
   setTheme,

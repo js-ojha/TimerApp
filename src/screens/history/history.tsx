@@ -139,7 +139,8 @@ const History = () => {
               </Text>
               <Text style={tw.style('text-sm', { color: colors.textAlt })}>
                 Completed at:{' '}
-                {new Date(item.completion_time).toLocaleDateString()}
+                {item?.completion_time &&
+                  new Date(item?.completion_time).toLocaleDateString()}
               </Text>
               <Text style={tw.style('text-sm mt-2', { color: colors.textAlt })}>
                 Duration: {item.duration} seconds
