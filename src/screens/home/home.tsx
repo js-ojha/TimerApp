@@ -10,7 +10,12 @@ import {
   Moon,
   Sun,
 } from '../../utils/icons';
-import { setTheme, showSuccess } from '../../utils/helpers';
+import {
+  playSound,
+  setTheme,
+  showInfo,
+  showSuccess,
+} from '../../utils/helpers';
 import { useTimer } from '../../provider/TimerProvider';
 import { useNavigation } from '@react-navigation/native';
 import { Timer } from '../../types/timer';
@@ -60,10 +65,8 @@ const Home = () => {
   const { state, dispatch } = useTimer();
   const { navigate } = useNavigation();
   const [currentOpenCategory, setCurrentOpenCategory] = React.useState<
-    'Workout' | 'Study' | 'Break'
+    'Workout' | 'Study' | 'Break' | ''
   >('Workout');
-
-  console.log('Timers State:', state.timers);
 
   const runningTimerIdsRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
@@ -99,11 +102,23 @@ const Home = () => {
           },
         });
 
+        // Mid Alerts Trigger
+        if (timer.mid_trigger && timer.mid_trigger > 0) {
+          const midAlertTime = Math.round(
+            (timer.duration * timer.mid_trigger) / 100,
+          );
+          if (currentRemaining === midAlertTime) {
+            playSound();
+            showInfo(`Alert: Timer ${timer.name} is at ${timer.mid_trigger}%`);
+          }
+        }
+
         // If timer reaches zero, stop automatically
         if (currentRemaining <= 0) {
           clearInterval(runningTimerIdsRef.current[timer._id]);
           delete runningTimerIdsRef.current[timer._id];
 
+          playSound();
           showSuccess('Timer completed: ' + timer.name);
 
           dispatch({
@@ -178,11 +193,23 @@ const Home = () => {
           },
         });
 
+        // Mid Alerts Trigger
+        if (timer.mid_trigger && timer.mid_trigger > 0) {
+          const midAlertTime = Math.round(
+            (timer.duration * timer.mid_trigger) / 100,
+          );
+          if (currentRemaining === midAlertTime) {
+            playSound();
+            showInfo(`Alert: Timer ${timer.name} is at ${timer.mid_trigger}%`);
+          }
+        }
+
         // If timer reaches zero, stop automatically
         if (currentRemaining <= 0) {
           clearInterval(runningTimerIdsRef.current[timer._id]);
           delete runningTimerIdsRef.current[timer._id];
 
+          playSound();
           showSuccess('Timer completed: ' + timer.name);
           // Mark timer as completed
 
@@ -212,6 +239,10 @@ const Home = () => {
       type: 'RESET_TIMERS',
       payload: [timer._id],
     });
+    if (runningTimerIdsRef.current[timer._id]) {
+      clearInterval(runningTimerIdsRef.current[timer._id]);
+      delete runningTimerIdsRef.current[timer._id];
+    }
     showSuccess('Timer reset successfully');
   };
 
@@ -244,7 +275,9 @@ const Home = () => {
               {/* Header */}
               <TouchableOpacity
                 onPress={() => {
-                  setCurrentOpenCategory('Workout');
+                  setCurrentOpenCategory(prev =>
+                    prev === 'Workout' ? '' : 'Workout',
+                  );
                 }}
                 style={tw.style(
                   'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
@@ -421,7 +454,9 @@ const Home = () => {
               {/* Header */}
               <TouchableOpacity
                 onPress={() => {
-                  setCurrentOpenCategory('Study');
+                  setCurrentOpenCategory(prev =>
+                    prev === 'Study' ? '' : 'Study',
+                  );
                 }}
                 style={tw.style(
                   'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
@@ -598,7 +633,9 @@ const Home = () => {
               {/* Header */}
               <TouchableOpacity
                 onPress={() => {
-                  setCurrentOpenCategory('Break');
+                  setCurrentOpenCategory(prev =>
+                    prev === 'Break' ? '' : 'Break',
+                  );
                 }}
                 style={tw.style(
                   'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',

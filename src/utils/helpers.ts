@@ -8,6 +8,7 @@ import {
 import { TimerData } from '../types/timer';
 import Toast from 'react-native-toast-message';
 import tw from '../lib/tailwind';
+import Sound from 'react-native-sound';
 
 function hexa(color: string, alpha: number) {
   let hex = color.replace(/^#/, '');
@@ -84,6 +85,30 @@ const showInfo = (msg: string) => {
   });
 };
 
+const playSound = () => {
+  try {
+    const sound = new Sound(require('../assets/sound/message.mp3'), error => {
+      if (error) {
+        console.log('Failed to load sound', error);
+        return;
+      }
+      sound.setVolume(0.5);
+      sound.setCategory('Playback');
+      sound.play(success => {
+        if (success) {
+          console.log('successfully finished playing');
+          sound.stop();
+          sound.release();
+        } else {
+          console.log('playback failed due to audio decoding errors');
+        }
+      });
+    });
+  } catch (error) {
+    console.log('Error playing sound:', error);
+  }
+};
+
 export {
   hexa,
   getTheme,
@@ -93,4 +118,5 @@ export {
   showError,
   showSuccess,
   showInfo,
+  playSound,
 };
