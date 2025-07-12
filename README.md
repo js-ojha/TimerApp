@@ -1,97 +1,128 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🕰️ Timer App
 
-# Getting Started
+A feature-rich, customizable timer application built using React Native CLI (without Expo).
+This app lets you create multiple timers, assign them to categories, set mid-session alerts, and track progress intuitively.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+🚀✨ Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+✅ Create custom timers with name, duration, category, and optional mid alerts.  
+✅ Group timers by category.  
+✅ Start, pause, and reset timers individually.  
+✅ ⭐ Batch actions on grouped timers (e.g., pause/start all timers in a category).  
+✅ 🔔 Mid alerts with sound and notification at specified percentages.  
+✅ 📤 Export and share timers as JSON data.  
+✅ 💾 Persistent storage using AsyncStorage.  
+✅ 🎨 Clean and customizable UI with light/dark theme support.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+⚡🛠️ Setup
 
-# OR using Yarn
+### Prerequisites
+
+- **Node.js** ≥ 18.x
+- **Yarn** or **npm**
+- **React Native CLI** installed globally
+- **Android Studio** (for Android) or Xcode (for iOS)
+- **Java JDK** 17+
+- Correctly configured **Android NDK** and CMake (if targeting native modules)
+
+---
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone
+cd timer-app
+```
+
+---
+
+### 2️⃣ Install dependencies
+
+```bash
+yarn install
+# or
+npm install
+```
+
+---
+
+### 3️⃣ Start Metro bundler
+
+```bash
 yarn start
+# or
+npm run start
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 4️⃣ Run on Android
 
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
+```bash
 yarn android
+# or
+npm run android
 ```
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### 5️⃣ Run on iOS
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
+```bash
+cd ios
+pod install
+cd ..
 yarn ios
+# or
+npm run ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+> ⚠️ Make sure you have an Apple machine and Xcode installed for iOS builds.
 
-## Step 3: Modify your app
+---
 
-Now that you have successfully run the app, let's make changes!
+💭💡 Assumptions Made During Development
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- **React Native CLI (not Expo)**: The project is built without Expo to allow more granular control over native modules (e.g., `react-native-sound`).
+- **AsyncStorage for persistence**: All timer data is stored locally using AsyncStorage; no backend/database integration.
+- **Hermes enabled**: The app uses Hermes for faster JS execution and smaller bundle sizes.
+- **Sound files included locally**: The alert sound (`message.mp3`) is assumed to be placed in `assets/sound/`.
+- **Category list can change**: Users can create new categories, and these are stored along with the timers.
+- **One mid-session alert per timer**: Only a single "mid" alert is supported per timer (specified as a percentage of total duration).
+- **No background execution**: Timers do not continue running in the background (e.g., when the app is closed or in the background state).
+- **CMake / NDK compatibility**: Assumed that the Android NDK and CMake versions are properly configured and compatible with React Native 0.80.
+- **iOS build may fail**: This project was built on windows machine, so while running on iOS there is a chance of build issues.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+---
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 💡 Additional Notes
 
-## Congratulations! :tada:
+- To export timers as a JSON file, a custom function is provided (`exportData`). You can adapt it to integrate with file-sharing or external storage if needed.
+- The UI uses Tailwind-style utility classes via `twrnc` for easy styling.
+- Sound playback handled using `react-native-sound`. You may need to patch or adjust if using Hermes (as we've done by modifying internal dependency resolution).
 
-You've successfully run and modified your React Native App. :partying_face:
+---
 
-### Now what?
+🚀🔮 Possible Improvements
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+- Add background timer support using `react-native-background-timer` or similar.
+- Add optional notifications when timers complete in the background.
+- Support for multi-device sync (e.g., using Firebase or custom backend).
+- More advanced sound/vibration customization.
+- Adding new categories on the fly.
 
-# Troubleshooting
+---
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 💬 Questions or Issues?
 
-# Learn More
+Feel free to open an issue or start a discussion in this repository. We welcome contributions and suggestions!
 
-To learn more about React Native, take a look at the following resources:
+---
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+### ✨ Happy timing! 💪⏳
