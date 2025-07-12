@@ -10,7 +10,12 @@ const initialState: TimerData = {
 const timerReducer = (state: TimerData, action: TimerAction): TimerData => {
   switch (action.type) {
     case 'LOAD_DATA':
-      return action.payload ?? { timers: [], categories: [] };
+      return (
+        action.payload ?? {
+          timers: [],
+          categories: ['Workout', 'Study', 'Break'],
+        }
+      );
     case 'ADD_TIMER':
       return {
         ...state,
@@ -41,7 +46,7 @@ const timerReducer = (state: TimerData, action: TimerAction): TimerData => {
           action.payload.includes(t._id)
             ? {
                 ...t,
-                status: 'created',
+                status: 'Created',
                 remaining_duration: t.duration,
                 updated_at: new Date().toISOString(),
               }

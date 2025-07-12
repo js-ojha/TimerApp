@@ -1,7 +1,7 @@
-import {DefaultTheme} from '@react-navigation/native';
-import {hexa, getTheme} from './helpers';
+import { DefaultTheme } from '@react-navigation/native';
+import { hexa, getTheme } from './helpers';
 import tw from '../lib/tailwind';
-import {useColorScheme} from 'react-native';
+import { useColorScheme } from 'react-native';
 import { useEffect, useState } from 'react';
 
 type Theme = {
@@ -46,6 +46,7 @@ type Theme = {
     };
   };
   skeleton: string;
+  foregroundAlt: string;
 };
 
 const color = tw.color as (color: string) => string;
@@ -92,6 +93,7 @@ const LightTheme: Theme = {
   textDisabled: color('neutral-400'),
   secondary: color('secondary'),
   fieldBackground: color('fieldBackground'),
+  foregroundAlt: color('foregroundAlt'),
 };
 
 const DarkTheme: Theme = {
@@ -136,6 +138,7 @@ const DarkTheme: Theme = {
   skeleton: hexa(color('neutral-400'), 0.3),
   textDisabled: color('neutral-500'),
   fieldBackground: color('fieldBackground-dark'),
+  foregroundAlt: color('foregroundAlt'),
 };
 
 const NavigationLightTheme: typeof DefaultTheme = {
@@ -170,7 +173,11 @@ const useResolvedTheme = () => {
     const loadTheme = async () => {
       try {
         const savedTheme = await getTheme();
-        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+        if (
+          savedTheme === 'light' ||
+          savedTheme === 'dark' ||
+          savedTheme === 'system'
+        ) {
           setTheme(savedTheme);
         } else {
           setTheme('system');
@@ -184,7 +191,7 @@ const useResolvedTheme = () => {
     loadTheme();
   }, []);
 
-  return theme === 'system' ? scheme : theme;
+  return theme === 'system' ? { theme: scheme, setTheme } : { theme, setTheme };
 };
 
 export {
