@@ -60,7 +60,7 @@ const timerReducer = (state: TimerData, action: TimerAction): TimerData => {
           t._id === action.payload
             ? {
                 ...t,
-                status: 'completed',
+                status: 'Completed',
                 completion_time: new Date().toISOString(),
               }
             : t,

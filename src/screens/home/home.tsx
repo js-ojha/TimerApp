@@ -63,6 +63,8 @@ const Home = () => {
     'Workout' | 'Study' | 'Break'
   >('Workout');
 
+  console.log('Timers State:', state.timers);
+
   const runningTimerIdsRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const groupedTimers = useMemo(() => {
@@ -73,7 +75,7 @@ const Home = () => {
       Break: [],
     };
     state.timers.forEach(timer => {
-      if (timer.category in timerByCategory && timer.status !== 'completed') {
+      if (timer.category in timerByCategory && timer.status !== 'Completed') {
         timerByCategory[timer.category].push(timer);
       }
     });
@@ -98,9 +100,11 @@ const Home = () => {
         });
 
         // If timer reaches zero, stop automatically
-        if ((timer.remaining_duration || timer.duration) <= 1) {
+        if (currentRemaining <= 0) {
           clearInterval(runningTimerIdsRef.current[timer._id]);
           delete runningTimerIdsRef.current[timer._id];
+
+          showSuccess('Timer completed: ' + timer.name);
 
           dispatch({
             type: 'COMPLETE_TIMER',
@@ -175,9 +179,12 @@ const Home = () => {
         });
 
         // If timer reaches zero, stop automatically
-        if ((timer.remaining_duration || timer.duration) <= 1) {
+        if (currentRemaining <= 0) {
           clearInterval(runningTimerIdsRef.current[timer._id]);
           delete runningTimerIdsRef.current[timer._id];
+
+          showSuccess('Timer completed: ' + timer.name);
+          // Mark timer as completed
 
           dispatch({
             type: 'COMPLETE_TIMER',
@@ -216,553 +223,550 @@ const Home = () => {
     >
       <ScreenHeader />
 
-      <ScrollView
-        style={tw.style('flex-1')}
-        showsVerticalScrollIndicator={false}
-      >
-        {!state.timers.length && (
-          <View style={tw.style('flex-1 items-center justify-center')}>
-            <Text style={tw.style({ color: colors.textAlt })}>
-              You have yet to create any timers...
-            </Text>
-          </View>
-        )}
-
-        {!!state.timers.length && (
-          <View style={tw.style('flex-1 px-4 py-4 gap-4')}>
-            {groupedTimers?.Workout.length > 0 && (
-              <View
-                style={tw.style('border rounded', {
-                  borderColor: colors.border,
-                })}
+      {!state.timers.length && (
+        <View style={tw.style('flex-1 items-center justify-center')}>
+          <Text style={tw.style({ color: colors.textAlt })}>
+            You have yet to create any timers...
+          </Text>
+        </View>
+      )}
+      {!!state.timers.length && (
+        <ScrollView
+          style={tw.style('flex-1 px-4 py-4 gap-4')}
+          showsVerticalScrollIndicator={false}
+        >
+          {groupedTimers?.Workout.length > 0 && (
+            <View
+              style={tw.style('border rounded', {
+                borderColor: colors.border,
+              })}
+            >
+              {/* Header */}
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentOpenCategory('Workout');
+                }}
+                style={tw.style(
+                  'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
+                  {
+                    borderBottomColor: colors.border,
+                  },
+                )}
               >
-                {/* Header */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setCurrentOpenCategory('Workout');
-                  }}
-                  style={tw.style(
-                    'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
-                    {
-                      borderBottomColor: colors.border,
-                    },
+                <View style={tw.style('flex-1 flex-row items-center gap-2')}>
+                  {currentOpenCategory === 'Workout' ? (
+                    <ChevronDown color={colors.textAlt} size={24} />
+                  ) : (
+                    <ChevronRight color={colors.textAlt} size={24} />
                   )}
-                >
-                  <View style={tw.style('flex-1 flex-row items-center gap-2')}>
-                    {currentOpenCategory === 'Workout' ? (
-                      <ChevronDown color={colors.textAlt} size={24} />
-                    ) : (
-                      <ChevronRight color={colors.textAlt} size={24} />
-                    )}
-                    <Text style={tw.style('font-medium')}>Workout</Text>
-                    <View
-                      style={tw.style(
-                        'w-8 h-8 rounded-full items-center justify-center',
-                        {
-                          backgroundColor: colors.fieldBackground,
-                        },
-                      )}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        {groupedTimers?.Workout?.length || 0}
-                      </Text>
-                    </View>
-                  </View>
-
+                  <Text style={tw.style('font-medium')}>Workout</Text>
                   <View
                     style={tw.style(
-                      'flex-1 flex-row justify-end items-center gap-2',
+                      'w-8 h-8 rounded-full items-center justify-center',
+                      {
+                        backgroundColor: colors.fieldBackground,
+                      },
                     )}
                   >
-                    <TouchableOpacity
-                      onPress={() => startAllTimers(groupedTimers?.Workout)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
                     >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Start All
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => pauseAllTimers(groupedTimers?.Workout)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Pause All
-                      </Text>
-                    </TouchableOpacity>
+                      {groupedTimers?.Workout?.length || 0}
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                </View>
 
-                {/* Timers List */}
-                {currentOpenCategory === 'Workout' && (
-                  <FlatList
-                    data={groupedTimers?.Workout}
-                    keyExtractor={item => item._id}
-                    contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
-                    renderItem={({ item }) => {
-                      const completedPercentage =
-                        ((item.duration - item.remaining_duration) /
-                          item.duration) *
-                        100;
-                      return (
+                <View
+                  style={tw.style(
+                    'flex-1 flex-row justify-end items-center gap-2',
+                  )}
+                >
+                  <TouchableOpacity
+                    onPress={() => startAllTimers(groupedTimers?.Workout)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Start All
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => pauseAllTimers(groupedTimers?.Workout)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Pause All
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+
+              {/* Timers List */}
+              {currentOpenCategory === 'Workout' && (
+                <FlatList
+                  data={groupedTimers?.Workout}
+                  keyExtractor={item => item._id}
+                  contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
+                  renderItem={({ item }) => {
+                    const completedPercentage =
+                      ((item.duration - item.remaining_duration) /
+                        item.duration) *
+                      100;
+                    return (
+                      <View
+                        style={tw.style('mb-3 p-4 border rounded', {
+                          borderColor: colors.border,
+                          backgroundColor: colors.fieldBackground,
+                        })}
+                      >
                         <View
-                          style={tw.style('mb-3 p-4 border rounded', {
-                            borderColor: colors.border,
-                            backgroundColor: colors.fieldBackground,
+                          style={tw.style(
+                            'flex-row justify-between items-center',
+                          )}
+                        >
+                          <Text style={tw.style('font-medium')}>
+                            {item.name}
+                          </Text>
+                          <Text
+                            style={tw.style('text-sm', {
+                              color: colors.textAlt,
+                            })}
+                          >
+                            {item.status}
+                          </Text>
+                        </View>
+
+                        <Text style={tw.style('font-bold text-xl mt-2')}>
+                          {item?.remaining_duration}
+                        </Text>
+
+                        <View
+                          style={tw.style('h-2 rounded mt-2', {
+                            backgroundColor: colors.foregroundAlt,
                           })}
                         >
                           <View
+                            style={tw.style('h-full rounded', {
+                              width: `${completedPercentage}%`,
+                              backgroundColor: colors.text,
+                            })}
+                          />
+                        </View>
+
+                        <View
+                          style={tw.style(
+                            'flex-1 flex-row items-center mt-4 gap-2',
+                          )}
+                        >
+                          <TouchableOpacity
+                            onPress={() => timerPress(item)}
                             style={tw.style(
-                              'flex-row justify-between items-center',
+                              'flex-4 rounded justify-center items-center py-2',
+                              {
+                                backgroundColor: colors.text,
+                              },
                             )}
                           >
-                            <Text style={tw.style('font-medium')}>
-                              {item.name}
+                            <Text
+                              style={tw.style('text-sm', {
+                                color: colors.background,
+                              })}
+                            >
+                              {item.status === 'Running'
+                                ? 'Pause'
+                                : item.status === 'Paused'
+                                ? 'Resume'
+                                : 'Start'}
                             </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => resetTimer(item)}
+                            style={tw.style(
+                              'flex-1 border rounded py-2 justify-center items-center',
+                              {
+                                borderColor: colors.textAlt,
+                              },
+                            )}
+                          >
                             <Text
                               style={tw.style('text-sm', {
                                 color: colors.textAlt,
                               })}
                             >
-                              {item.status}
+                              Reset
                             </Text>
-                          </View>
-
-                          <Text style={tw.style('font-bold text-xl mt-2')}>
-                            {item?.remaining_duration}
-                          </Text>
-
-                          <View
-                            style={tw.style('h-2 rounded mt-2', {
-                              backgroundColor: colors.foregroundAlt,
-                            })}
-                          >
-                            <View
-                              style={tw.style('h-full rounded', {
-                                width: `${completedPercentage}%`,
-                                backgroundColor: colors.text,
-                              })}
-                            />
-                          </View>
-
-                          <View
-                            style={tw.style(
-                              'flex-1 flex-row items-center mt-4 gap-2',
-                            )}
-                          >
-                            <TouchableOpacity
-                              onPress={() => timerPress(item)}
-                              style={tw.style(
-                                'flex-4 rounded justify-center items-center py-2',
-                                {
-                                  backgroundColor: colors.text,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.background,
-                                })}
-                              >
-                                {item.status === 'Running'
-                                  ? 'Pause'
-                                  : item.status === 'Paused'
-                                  ? 'Resume'
-                                  : 'Start'}
-                              </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => resetTimer(item)}
-                              style={tw.style(
-                                'flex-1 border rounded py-2 justify-center items-center',
-                                {
-                                  borderColor: colors.textAlt,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.textAlt,
-                                })}
-                              >
-                                Reset
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                          </TouchableOpacity>
                         </View>
-                      );
-                    }}
-                  />
-                )}
-              </View>
-            )}
-
-            {groupedTimers?.Study.length > 0 && (
-              <View
-                style={tw.style('border rounded', {
-                  borderColor: colors.border,
-                })}
-              >
-                {/* Header */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setCurrentOpenCategory('Study');
+                      </View>
+                    );
                   }}
-                  style={tw.style(
-                    'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
-                    {
-                      borderBottomColor: colors.border,
-                    },
-                  )}
-                >
-                  <View style={tw.style('flex-1 flex-row items-center gap-2')}>
-                    {currentOpenCategory === 'Study' ? (
-                      <ChevronDown color={colors.textAlt} size={24} />
-                    ) : (
-                      <ChevronRight color={colors.textAlt} size={24} />
-                    )}
-                    <Text style={tw.style('font-medium')}>Study</Text>
-                    <View
-                      style={tw.style(
-                        'w-8 h-8 rounded-full items-center justify-center',
-                        {
-                          backgroundColor: colors.fieldBackground,
-                        },
-                      )}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        {groupedTimers?.Study?.length || 0}
-                      </Text>
-                    </View>
-                  </View>
+                />
+              )}
+            </View>
+          )}
 
+          {groupedTimers?.Study.length > 0 && (
+            <View
+              style={tw.style('border rounded', {
+                borderColor: colors.border,
+              })}
+            >
+              {/* Header */}
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentOpenCategory('Study');
+                }}
+                style={tw.style(
+                  'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
+                  {
+                    borderBottomColor: colors.border,
+                  },
+                )}
+              >
+                <View style={tw.style('flex-1 flex-row items-center gap-2')}>
+                  {currentOpenCategory === 'Study' ? (
+                    <ChevronDown color={colors.textAlt} size={24} />
+                  ) : (
+                    <ChevronRight color={colors.textAlt} size={24} />
+                  )}
+                  <Text style={tw.style('font-medium')}>Study</Text>
                   <View
                     style={tw.style(
-                      'flex-1 flex-row justify-end items-center gap-2',
+                      'w-8 h-8 rounded-full items-center justify-center',
+                      {
+                        backgroundColor: colors.fieldBackground,
+                      },
                     )}
                   >
-                    <TouchableOpacity
-                      onPress={() => startAllTimers(groupedTimers?.Study)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
                     >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Start All
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => pauseAllTimers(groupedTimers?.Study)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Pause All
-                      </Text>
-                    </TouchableOpacity>
+                      {groupedTimers?.Study?.length || 0}
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                </View>
 
-                {/* Timers List */}
-                {currentOpenCategory === 'Study' && (
-                  <FlatList
-                    data={groupedTimers?.Study}
-                    keyExtractor={item => item._id}
-                    contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
-                    renderItem={({ item }) => {
-                      const completedPercentage =
-                        ((item.duration - item.remaining_duration) /
-                          item.duration) *
-                        100;
-                      return (
+                <View
+                  style={tw.style(
+                    'flex-1 flex-row justify-end items-center gap-2',
+                  )}
+                >
+                  <TouchableOpacity
+                    onPress={() => startAllTimers(groupedTimers?.Study)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Start All
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => pauseAllTimers(groupedTimers?.Study)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Pause All
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+
+              {/* Timers List */}
+              {currentOpenCategory === 'Study' && (
+                <FlatList
+                  data={groupedTimers?.Study}
+                  keyExtractor={item => item._id}
+                  contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
+                  renderItem={({ item }) => {
+                    const completedPercentage =
+                      ((item.duration - item.remaining_duration) /
+                        item.duration) *
+                      100;
+                    return (
+                      <View
+                        style={tw.style('mb-3 p-4 border rounded', {
+                          borderColor: colors.border,
+                          backgroundColor: colors.fieldBackground,
+                        })}
+                      >
                         <View
-                          style={tw.style('mb-3 p-4 border rounded', {
-                            borderColor: colors.border,
-                            backgroundColor: colors.fieldBackground,
+                          style={tw.style(
+                            'flex-row justify-between items-center',
+                          )}
+                        >
+                          <Text style={tw.style('font-medium')}>
+                            {item.name}
+                          </Text>
+                          <Text
+                            style={tw.style('text-sm', {
+                              color: colors.textAlt,
+                            })}
+                          >
+                            {item.status}
+                          </Text>
+                        </View>
+
+                        <Text style={tw.style('font-bold text-xl mt-2')}>
+                          {item?.remaining_duration}
+                        </Text>
+
+                        <View
+                          style={tw.style('h-2 rounded mt-2', {
+                            backgroundColor: colors.foregroundAlt,
                           })}
                         >
                           <View
+                            style={tw.style('h-full rounded', {
+                              width: `${completedPercentage}%`,
+                              backgroundColor: colors.text,
+                            })}
+                          />
+                        </View>
+
+                        <View
+                          style={tw.style(
+                            'flex-1 flex-row items-center mt-4 gap-2',
+                          )}
+                        >
+                          <TouchableOpacity
+                            onPress={() => timerPress(item)}
                             style={tw.style(
-                              'flex-row justify-between items-center',
+                              'flex-4 rounded justify-center items-center py-2',
+                              {
+                                backgroundColor: colors.text,
+                              },
                             )}
                           >
-                            <Text style={tw.style('font-medium')}>
-                              {item.name}
+                            <Text
+                              style={tw.style('text-sm', {
+                                color: colors.background,
+                              })}
+                            >
+                              {item.status === 'Running'
+                                ? 'Pause'
+                                : item.status === 'Paused'
+                                ? 'Resume'
+                                : 'Start'}
                             </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => resetTimer(item)}
+                            style={tw.style(
+                              'flex-1 border rounded py-2 justify-center items-center',
+                              {
+                                borderColor: colors.textAlt,
+                              },
+                            )}
+                          >
                             <Text
                               style={tw.style('text-sm', {
                                 color: colors.textAlt,
                               })}
                             >
-                              {item.status}
+                              Reset
                             </Text>
-                          </View>
-
-                          <Text style={tw.style('font-bold text-xl mt-2')}>
-                            {item?.remaining_duration}
-                          </Text>
-
-                          <View
-                            style={tw.style('h-2 rounded mt-2', {
-                              backgroundColor: colors.foregroundAlt,
-                            })}
-                          >
-                            <View
-                              style={tw.style('h-full rounded', {
-                                width: `${completedPercentage}%`,
-                                backgroundColor: colors.text,
-                              })}
-                            />
-                          </View>
-
-                          <View
-                            style={tw.style(
-                              'flex-1 flex-row items-center mt-4 gap-2',
-                            )}
-                          >
-                            <TouchableOpacity
-                              onPress={() => timerPress(item)}
-                              style={tw.style(
-                                'flex-4 rounded justify-center items-center py-2',
-                                {
-                                  backgroundColor: colors.text,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.background,
-                                })}
-                              >
-                                {item.status === 'Running'
-                                  ? 'Pause'
-                                  : item.status === 'Paused'
-                                  ? 'Resume'
-                                  : 'Start'}
-                              </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => resetTimer(item)}
-                              style={tw.style(
-                                'flex-1 border rounded py-2 justify-center items-center',
-                                {
-                                  borderColor: colors.textAlt,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.textAlt,
-                                })}
-                              >
-                                Reset
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                          </TouchableOpacity>
                         </View>
-                      );
-                    }}
-                  />
-                )}
-              </View>
-            )}
-
-            {groupedTimers?.Break.length > 0 && (
-              <View
-                style={tw.style('border rounded', {
-                  borderColor: colors.border,
-                })}
-              >
-                {/* Header */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setCurrentOpenCategory('Break');
+                      </View>
+                    );
                   }}
-                  style={tw.style(
-                    'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
-                    {
-                      borderBottomColor: colors.border,
-                    },
-                  )}
-                >
-                  <View style={tw.style('flex-1 flex-row items-center gap-2')}>
-                    {currentOpenCategory === 'Break' ? (
-                      <ChevronDown color={colors.textAlt} size={24} />
-                    ) : (
-                      <ChevronRight color={colors.textAlt} size={24} />
-                    )}
-                    <Text style={tw.style('font-medium')}>Break</Text>
-                    <View
-                      style={tw.style(
-                        'w-8 h-8 rounded-full items-center justify-center',
-                        {
-                          backgroundColor: colors.fieldBackground,
-                        },
-                      )}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        {groupedTimers?.Break?.length || 0}
-                      </Text>
-                    </View>
-                  </View>
+                />
+              )}
+            </View>
+          )}
 
+          {groupedTimers?.Break.length > 0 && (
+            <View
+              style={tw.style('border rounded', {
+                borderColor: colors.border,
+              })}
+            >
+              {/* Header */}
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentOpenCategory('Break');
+                }}
+                style={tw.style(
+                  'flex-row justify-between items-center border-b rounded pl-4 pr-2 py-3 gap-2',
+                  {
+                    borderBottomColor: colors.border,
+                  },
+                )}
+              >
+                <View style={tw.style('flex-1 flex-row items-center gap-2')}>
+                  {currentOpenCategory === 'Break' ? (
+                    <ChevronDown color={colors.textAlt} size={24} />
+                  ) : (
+                    <ChevronRight color={colors.textAlt} size={24} />
+                  )}
+                  <Text style={tw.style('font-medium')}>Break</Text>
                   <View
                     style={tw.style(
-                      'flex-1 flex-row justify-end items-center gap-2',
+                      'w-8 h-8 rounded-full items-center justify-center',
+                      {
+                        backgroundColor: colors.fieldBackground,
+                      },
                     )}
                   >
-                    <TouchableOpacity
-                      onPress={() => startAllTimers(groupedTimers?.Break)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
                     >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Start All
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => pauseAllTimers(groupedTimers?.Break)}
-                      style={tw.style('px-2 py-1 rounded', {
-                        backgroundColor: colors.fieldBackground,
-                      })}
-                    >
-                      <Text
-                        style={tw.style('text-sm', { color: colors.textAlt })}
-                      >
-                        Pause All
-                      </Text>
-                    </TouchableOpacity>
+                      {groupedTimers?.Break?.length || 0}
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                </View>
 
-                {/* Timers List */}
-                {currentOpenCategory === 'Break' && (
-                  <FlatList
-                    data={groupedTimers?.Break}
-                    keyExtractor={item => item._id}
-                    contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
-                    renderItem={({ item }) => {
-                      const completedPercentage =
-                        ((item.duration - item.remaining_duration) /
-                          item.duration) *
-                        100;
-                      return (
+                <View
+                  style={tw.style(
+                    'flex-1 flex-row justify-end items-center gap-2',
+                  )}
+                >
+                  <TouchableOpacity
+                    onPress={() => startAllTimers(groupedTimers?.Break)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Start All
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => pauseAllTimers(groupedTimers?.Break)}
+                    style={tw.style('px-2 py-1 rounded', {
+                      backgroundColor: colors.fieldBackground,
+                    })}
+                  >
+                    <Text
+                      style={tw.style('text-sm', { color: colors.textAlt })}
+                    >
+                      Pause All
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+
+              {/* Timers List */}
+              {currentOpenCategory === 'Break' && (
+                <FlatList
+                  data={groupedTimers?.Break}
+                  keyExtractor={item => item._id}
+                  contentContainerStyle={tw.style('px-4 pt-4 pb-2')}
+                  renderItem={({ item }) => {
+                    const completedPercentage =
+                      ((item.duration - item.remaining_duration) /
+                        item.duration) *
+                      100;
+                    return (
+                      <View
+                        style={tw.style('mb-3 p-4 border rounded', {
+                          borderColor: colors.border,
+                          backgroundColor: colors.fieldBackground,
+                        })}
+                      >
                         <View
-                          style={tw.style('mb-3 p-4 border rounded', {
-                            borderColor: colors.border,
-                            backgroundColor: colors.fieldBackground,
+                          style={tw.style(
+                            'flex-row justify-between items-center',
+                          )}
+                        >
+                          <Text style={tw.style('font-medium')}>
+                            {item.name}
+                          </Text>
+                          <Text
+                            style={tw.style('text-sm', {
+                              color: colors.textAlt,
+                            })}
+                          >
+                            {item.status}
+                          </Text>
+                        </View>
+
+                        <Text style={tw.style('font-bold text-xl mt-2')}>
+                          {item?.remaining_duration}
+                        </Text>
+
+                        <View
+                          style={tw.style('h-2 rounded mt-2', {
+                            backgroundColor: colors.foregroundAlt,
                           })}
                         >
                           <View
+                            style={tw.style('h-full rounded', {
+                              width: `${completedPercentage}%`,
+                              backgroundColor: colors.text,
+                            })}
+                          />
+                        </View>
+
+                        <View
+                          style={tw.style(
+                            'flex-1 flex-row items-center mt-4 gap-2',
+                          )}
+                        >
+                          <TouchableOpacity
+                            onPress={() => timerPress(item)}
                             style={tw.style(
-                              'flex-row justify-between items-center',
+                              'flex-4 rounded justify-center items-center py-2',
+                              {
+                                backgroundColor: colors.text,
+                              },
                             )}
                           >
-                            <Text style={tw.style('font-medium')}>
-                              {item.name}
+                            <Text
+                              style={tw.style('text-sm', {
+                                color: colors.background,
+                              })}
+                            >
+                              {item.status === 'Running'
+                                ? 'Pause'
+                                : item.status === 'Paused'
+                                ? 'Resume'
+                                : 'Start'}
                             </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => resetTimer(item)}
+                            style={tw.style(
+                              'flex-1 border rounded py-2 justify-center items-center',
+                              {
+                                borderColor: colors.textAlt,
+                              },
+                            )}
+                          >
                             <Text
                               style={tw.style('text-sm', {
                                 color: colors.textAlt,
                               })}
                             >
-                              {item.status}
+                              Reset
                             </Text>
-                          </View>
-
-                          <Text style={tw.style('font-bold text-xl mt-2')}>
-                            {item?.remaining_duration}
-                          </Text>
-
-                          <View
-                            style={tw.style('h-2 rounded mt-2', {
-                              backgroundColor: colors.foregroundAlt,
-                            })}
-                          >
-                            <View
-                              style={tw.style('h-full rounded', {
-                                width: `${completedPercentage}%`,
-                                backgroundColor: colors.text,
-                              })}
-                            />
-                          </View>
-
-                          <View
-                            style={tw.style(
-                              'flex-1 flex-row items-center mt-4 gap-2',
-                            )}
-                          >
-                            <TouchableOpacity
-                              onPress={() => timerPress(item)}
-                              style={tw.style(
-                                'flex-4 rounded justify-center items-center py-2',
-                                {
-                                  backgroundColor: colors.text,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.background,
-                                })}
-                              >
-                                {item.status === 'Running'
-                                  ? 'Pause'
-                                  : item.status === 'Paused'
-                                  ? 'Resume'
-                                  : 'Start'}
-                              </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => resetTimer(item)}
-                              style={tw.style(
-                                'flex-1 border rounded py-2 justify-center items-center',
-                                {
-                                  borderColor: colors.textAlt,
-                                },
-                              )}
-                            >
-                              <Text
-                                style={tw.style('text-sm', {
-                                  color: colors.textAlt,
-                                })}
-                              >
-                                Reset
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                          </TouchableOpacity>
                         </View>
-                      );
-                    }}
-                  />
-                )}
-              </View>
-            )}
-          </View>
-        )}
-      </ScrollView>
+                      </View>
+                    );
+                  }}
+                />
+              )}
+            </View>
+          )}
+        </ScrollView>
+      )}
 
       <TouchableOpacity
         onPress={() => {
